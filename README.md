@@ -51,4 +51,3 @@ KUBERNETES_NODE = {
 ### CPU: 2核以上
 ### 内存: 不低于4G
 ### 内核版本必须升级，不然会有DNS解析的问题
-# KubernetesInstall
