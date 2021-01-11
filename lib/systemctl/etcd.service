@@ -1,0 +1,8 @@
+[Unit]
+Description=Etcd Service
+Documentation=https://coreos.com/etcd/docs/latest/
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+Alias=etcd3.service

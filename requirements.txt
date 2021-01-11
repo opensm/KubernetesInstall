@@ -1,0 +1,3 @@
+paramiko
+kubernetes
+pyyaml

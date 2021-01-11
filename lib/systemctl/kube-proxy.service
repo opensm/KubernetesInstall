@@ -1,0 +1,6 @@
+[Unit]
+Description=Kubernetes Kube Proxy
+Documentation=https://github.com/kubernetes/kubernetes
+After=network.target
+[Install]
+WantedBy=multi-user.target

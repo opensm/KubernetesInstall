@@ -1,0 +1,7 @@
+[Unit]
+Description=Kubernetes Scheduler
+Documentation=https://github.com/kubernetes/kubernetes
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
