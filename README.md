@@ -3,7 +3,7 @@
 `kubernetes:v1.8    
 Etcd:3.4.9         
 Cni:0.8.6         
-calico/cni:v3.9.6   
+flannel:v3.9.6   
 coredns:1.4.0   `
 ## _安装步骤_
 ### 1. 配置文件修改 
@@ -50,4 +50,3 @@ KUBERNETES_NODE = {
 ### python版本：python2.7
 ### CPU: 2核以上
 ### 内存: 不低于4G
-### 内核版本必须升级，不然会有DNS解析的问题
