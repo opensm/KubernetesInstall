@@ -1,4 +1,10 @@
 # Kubernetes 一键安装工具
+## 说明:
+`脚本中不包含
+1.kubernetes-node-linux-amd64.tar.gz
+2.kubernetes-server-linux-amd64.tar.gz
+请将以上文件下载并放置到lib/package目录中
+`
 ## 版本：
 `kubernetes:v1.8    
 Etcd:3.4.9         
@@ -50,4 +56,4 @@ KUBERNETES_NODE = {
 ### python版本：python2.7
 ### CPU: 2核以上
 ### 内存: 不低于4G
-### 内核版本必须升级，不然会有DNS解析的问题
+###脚本将持续更新 有问题请联系我 QQ:1096010121
