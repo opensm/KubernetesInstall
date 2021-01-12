@@ -11,6 +11,40 @@ sftp = SSHFtp()
 sftp.setLoginVariable(data=AUTHENTICATION)
 
 
+def tag_decorator(tag):
+    def rapTheFunction(*args, **kwargs):
+        check_file = os.path.join(TAG_FILE_DIR, '{0}.success'.format(getattr(tag, '__name__')))
+        if os.path.exists(check_file):
+            RecodeLog.info(msg="{0} 已经执行，跳过执行!".format(getattr(tag, '__name__')))
+            return None
+        else:
+            test_ping()
+            RecodeLog.info("=============开始执行:{0}===============".format(getattr(tag, '__name__')))
+            tag()
+            RecodeLog.info("=============执行完成:{0}===============".format(getattr(tag, '__name__')))
+            Achieve.touch_achieve(check_file)
+            return None
+
+    return rapTheFunction
+
+
+def class_tag_decorator(tag):
+    def rapTheFunction(self):
+        check_file = os.path.join(TAG_FILE_DIR, '{0}.success'.format(getattr(tag, '__name__')))
+        if os.path.exists(check_file):
+            RecodeLog.info(msg="{0} 已经执行，跳过执行!".format(getattr(tag, '__name__')))
+            return None
+        else:
+            test_ping()
+            RecodeLog.info("=============开始执行:{0}===============".format(getattr(tag, '__name__')))
+            tag(self)
+            RecodeLog.info("=============执行完成:{0}===============".format(getattr(tag, '__name__')))
+            Achieve.touch_achieve(check_file)
+            return None
+
+    return rapTheFunction
+
+
 def check_env():
     if len(KUBERNETES_MASTER.values()) == 1 and KUBERNETES_MASTER.values()[0] != KUBERNETES_VIP:
         RecodeLog.error(msg="单节点中请将VPN与masterIP设置一致！")
@@ -29,7 +63,6 @@ def check_env():
 
 
 def write_hosts():
-    RecodeLog.info("=============开始执行写入hosts===============")
     hosts = "/etc/hosts"
     k8s_hosts = "/etc/hosts.kube"
     shutil.copy(src=hosts, dst=k8s_hosts)
@@ -42,7 +75,6 @@ def write_hosts():
             assert False
         else:
             RecodeLog.info(msg="成功写入/etc/hosts,{0} {1}".format(key, value))
-    RecodeLog.info("=============写入hosts完成===============")
 
 
 def write_hostname(host, hostname):
@@ -90,12 +122,12 @@ def get_cluster_list():
     return cluster_list
 
 
+@tag_decorator
 def dependent():
-    RecodeLog.info("=============开始执行dependent部分===============")
-    check_file = os.path.join(CURRENT_PATH, 'tmp', 'dependent.success')
-    if os.path.exists(check_file):
-        RecodeLog.info("=============已存在完成状态文件，跳过执行dependent部分===============")
-        return True
+    # check_file = os.path.join(CURRENT_PATH, 'tmp', 'dependent.success')
+    # if os.path.exists(check_file):
+    #     RecodeLog.info("=============已存在完成状态文件，跳过执行dependent部分===============")
+    #     return True
     cluster_list = get_cluster_list()
     for host in cluster_list:
         sftp.host = host
@@ -109,17 +141,18 @@ def dependent():
             remote_dir=REMOTE_TMP_DIR
         )
         sftp.close()
-    Achieve.touch_achieve(achieve=check_file)
+    # Achieve.touch_achieve(achieve=check_file)
     rsync_host()
     return True
 
 
+@tag_decorator
 def kernel_update():
-    RecodeLog.info("=============开始执行kernel_update部分===============")
-    check_file = os.path.join(TAG_FILE_DIR, 'kernel_update.success')
-    if os.path.exists(check_file):
-        RecodeLog.info("=============已存在完成状态文件，跳过执行kernel_update部分===============")
-        return True
+    # RecodeLog.info("=============开始执行kernel_update部分===============")
+    # check_file = os.path.join(TAG_FILE_DIR, 'kernel_update.success')
+    # if os.path.exists(check_file):
+    #     RecodeLog.info("=============已存在完成状态文件，跳过执行kernel_update部分===============")
+    #     return True
     command = "bash {0}".format(os.path.join(
         REMOTE_TMP_DIR, 'upgrade-kernel.sh'
     ))
@@ -130,7 +163,7 @@ def kernel_update():
         sftp.remote_cmd(command=command)
         sftp.close()
         RecodeLog.info(msg="主机:{0},执行成功:{1}".format(host, command))
-    Achieve.touch_achieve(achieve=check_file)
+    # Achieve.touch_achieve(achieve=check_file)
     # reboot = ""
     # while reboot.upper() not in ['YES', 'NO', 'Y', 'N']:
     #     reboot = raw_input("注意！！！！！\nkernel升级完成,是否现在重启集群全部主机？yes/YES or NO/no:")
@@ -155,16 +188,17 @@ def kernel_update():
     # else:
     #     RecodeLog.info(msg="请操作完成之后自行重启集群主机")
     #     assert False
-    Achieve.touch_achieve(achieve=check_file)
+    # Achieve.touch_achieve(achieve=check_file)
     return True
 
 
+@tag_decorator
 def docker_install():
-    RecodeLog.info("=============开始执行docker_install部分===============")
-    check_file = os.path.join(TAG_FILE_DIR, 'docker_install.success')
-    if os.path.exists(check_file):
-        RecodeLog.info("=============已存在完成状态文件，跳过执行docker_install部分===============")
-        return True
+    # RecodeLog.info("=============开始执行docker_install部分===============")
+    # check_file = os.path.join(TAG_FILE_DIR, 'docker_install.success')
+    # if os.path.exists(check_file):
+    #     RecodeLog.info("=============已存在完成状态文件，跳过执行docker_install部分===============")
+    #     return True
     cluster_list = get_cluster_list()
     command = "bash {0}".format(
         os.path.join(
@@ -177,7 +211,7 @@ def docker_install():
         sftp.close()
         RecodeLog.info(msg="主机:{0},执行成功:{1}".format(host, command))
 
-    Achieve.touch_achieve(achieve=check_file)
+    # Achieve.touch_achieve(achieve=check_file)
 
 
 def test_ping():
@@ -198,5 +232,7 @@ __all__ = [
     'docker_install',
     'check_env',
     'get_cluster_list',
+    'tag_decorator',
+    'class_tag_decorator',
     'test_ping'
 ]

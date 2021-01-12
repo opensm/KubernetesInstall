@@ -13,7 +13,7 @@ from lib.setting.cni import CNI_CONFIG_DIR
 from lib.setting.base import *
 from lib.setting.openssl import OPENSSL_TMP_DIR
 from lib.settings import KUBERNETES_MASTER, KUBERNETES_NODE, KUBERNETES_APISERVER, AUTHENTICATION
-from lib.dependent import get_cluster_list
+from lib.dependent import get_cluster_list, class_tag_decorator
 
 
 class KubernetesInstall:
@@ -351,14 +351,11 @@ class KubernetesInstall:
 
             self.sftp.close()
 
+    @class_tag_decorator
     def bootstrappers_install(self):
         """
         :return:
         """
-        RecodeLog.info("=============开始生成同步到其他节点kube-bootstrappers===============")
-        check_file = os.path.join(TAG_FILE_DIR, 'kubernetes_bootstrappers.success')
-        if os.path.exists(check_file):
-            return True
         bootstrap = copy.deepcopy(BOOTSTRAP_TOKEN)
         self.generic_bootstrap_token(params=bootstrap)
         if not os.path.exists(
@@ -397,7 +394,6 @@ class KubernetesInstall:
                 )
             )
             self.sftp.close()
-        Achieve.touch_achieve(achieve=check_file)
         RecodeLog.info("=============开始同步到其他节点kube-bootstrappers===============")
 
     def kubelet_service(self):
@@ -720,29 +716,19 @@ class KubernetesInstall:
             self.sftp.remote_cmd(command='/bin/systemctl start kube-proxy.service')
             self.sftp.close()
 
+    @class_tag_decorator
     def package_decompression(self):
         """
         :return:
         """
-        RecodeLog.info("=============开始本地解压安装kubernetes===============")
-        # a = AchieveControl()
-        check_file = os.path.join(TAG_FILE_DIR, 'kubernetes_package.success')
-        if os.path.exists(check_file):
-            return True
         self.server_decompression()
         self.node_decompression()
-        Achieve.touch_achieve(achieve=check_file)
-        RecodeLog.info("=============本地解压安装完成kubernetes===============")
-        return True
 
+    @class_tag_decorator
     def kubernetes_rsync(self):
         """
         :return:
         """
-        RecodeLog.info("=============开始同步到其他节点kubernetes和kubelet===============")
-        check_file = os.path.join(TAG_FILE_DIR, 'kubernetes_rsync.success')
-        if os.path.exists(check_file):
-            return True
         self.kubelet_config()
         # 生成kubernetes server启动脚本
         self.kubelet_service()
@@ -759,19 +745,12 @@ class KubernetesInstall:
         self.start_master_service()
         self.start_kubelet()
         self.pykube.login(pkey=os.path.join(TMP_KUBERNETES_MASTER_CONFIG_DIR, 'admin.kubeconfig'))
-        Achieve.touch_achieve(achieve=check_file)
-        RecodeLog.info("=============开始同步到其他节点kubernetes和kubelet===============")
-        return True
 
+    @class_tag_decorator
     def kube_proxy_rsync(self):
         """
         :return:
         """
-        RecodeLog.info("=============开始同步到其他节点kube-proxy===============")
-        # a = AchieveControl()
-        check_file = os.path.join(TAG_FILE_DIR, 'kubernetes_kubeproxy.success')
-        if os.path.exists(check_file):
-            return True
         time.sleep(60)
         self.tag_cluster()
         params = copy.deepcopy(KUBE_PROXY)
@@ -781,10 +760,9 @@ class KubernetesInstall:
         self.kube_proxy_config_rsync()
         self.kuberproxy_control()
         self.kubectl_apply()
-        Achieve.touch_achieve(achieve=check_file)
         RecodeLog.info("=============开始同步到其他节点kube-proxy===============")
-        return True
 
+    @class_tag_decorator
     def write_flannel_yaml(self):
         """
         :return:
@@ -797,6 +775,7 @@ class KubernetesInstall:
         Achieve.alter_achieve(achieve=flannel_dec, old_str='CLUSTER_RANGE', new_str=CLUSTER_ADDRESS)
         Achieve.alter_achieve(achieve=flannel_dec, old_str='CNI_IMAGE', new_str=IMAGE_DICT['CNI'])
 
+    @class_tag_decorator
     def write_coredns_yaml(self):
         """
         :return:

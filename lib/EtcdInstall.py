@@ -5,6 +5,7 @@ from lib.BaseCommand import SSHFtp
 from lib.FileCommand import Achieve
 from lib.OpenSSlControl import Cf
 from lib.setting.etcd import *
+from lib.dependent import class_tag_decorator
 from lib.settings import CURRENT_PATH, ETCD_CLUSTER_LIST, AUTHENTICATION
 from lib.setting.openssl import OPENSSL_TMP_DIR
 from lib.setting.base import TMP_SYSTEMCTL_DIR, SYSTEMCTL_DIR
@@ -125,7 +126,7 @@ class EtcdInstall:
         command2 = "[[ -f {0} ]] || rm -f {0}".format(
             os.path.join(ETCD_CONFIG_DIR, 'config.yaml')
         )
-        command4 = "ln -s {0} {1}".format(
+        command4 = "ln -fs {0} {1}".format(
             os.path.join(ETCD_HOME, 'etcd.service'),
             SYSTEMCTL_DIR
         )
@@ -157,7 +158,6 @@ class EtcdInstall:
         """
         :return:
         """
-        # r = RemoteSSHCommand()
         for value in ETCD_CLUSTER_LIST:
             self.sftp.host = value
             self.sftp.connect()
@@ -166,19 +166,11 @@ class EtcdInstall:
             self.sftp.remote_cmd(command="nohup /bin/systemctl start --now  etcd >/dev/null &")
             self.sftp.close()
 
+    @class_tag_decorator
     def run_etcd(self):
         """
         :return:
         """
-        RecodeLog.info("=============开始执行etcd部分===============")
-        # a = AchieveControl()
-        check_file = os.path.join(CURRENT_PATH, 'tmp', 'etcd.success')
-        if os.path.exists(check_file):
-            RecodeLog.info("=============已存在完成状态文件，跳过执行etcd部分===============")
-            return True
         self.install()
         self.rsync_install()
         self.etcd_control()
-        Achieve.touch_achieve(achieve=check_file)
-        RecodeLog.info("=============执行完成etcd部分===============")
-        return True

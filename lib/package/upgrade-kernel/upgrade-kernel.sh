@@ -60,7 +60,7 @@ EOF
 
 sysctl -p
 
-yum install conntrack-tools -y
+yum -y install conntrack-tools libnl-devel.x86_64
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   echo "conntrack-tools 安装失败"

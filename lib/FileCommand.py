@@ -79,7 +79,7 @@ class AchieveControl(object):
                 y = yaml.dump(content, f)
                 f.close()
                 RecodeLog.info(
-                    msg="执行成功, 保存内容是：{0}".format(y)
+                    msg="执行成功, 保存内容是：{0}".format(content)
                 )
                 return True
         except Exception as error:

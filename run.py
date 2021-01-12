@@ -17,8 +17,8 @@ e = EtcdInstall()
 h = HaProxyInstall()
 c = CNIInstall()
 kp = KeepalivedInstall()
-k.write_flannel_yaml()
 a = AchieveControl()
+
 check_file = os.path.join(CURRENT_PATH, 'tmp', 'install.lock')
 if os.path.exists(check_file):
     print("已完成安装，请确认是否可以重复执行！")
@@ -27,10 +27,8 @@ if os.path.exists(check_file):
 check_env()
 # 全局依赖安装
 # 测试
-test_ping()
 dependent()
 kernel_update()
-test_ping()
 docker_install()
 # openssl 证书
 s.run_openssl()

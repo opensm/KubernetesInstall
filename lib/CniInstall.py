@@ -4,6 +4,7 @@ from lib.FileCommand import Achieve
 from lib.settings import *
 from lib.setting.cni import *
 from lib.Log import RecodeLog
+from lib.dependent import class_tag_decorator
 
 
 class CNIInstall:
@@ -59,17 +60,10 @@ class CNIInstall:
             RecodeLog.info(msg="远程同步CNI程序到：{0},成功！".format(host))
             self.sftp.close()
 
+    @class_tag_decorator
     def run_cni(self):
         """
         :return:
         """
-        RecodeLog.info("=============开始执行cni部分===============")
-        check_file = os.path.join(CURRENT_PATH, 'tmp', 'cni.success')
-        if os.path.exists(check_file):
-            RecodeLog.info("=============已存在完成状态文件，跳过执行cni部分===============")
-            return True
         self.cni_install()
         self.rsync_install()
-        Achieve.touch_achieve(achieve=check_file)
-        RecodeLog.info("=============执行完成cni部分===============")
-        return True

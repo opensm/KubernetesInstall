@@ -7,6 +7,7 @@ from lib.FileCommand import Achieve
 from lib.settings import *
 from lib.setting.base import CMD_FILE_DIR
 from lib.Log import *
+from lib.dependent import class_tag_decorator
 
 if int(platform.python_version().strip(".")[0]) < 3:
     from ConfigParser import ConfigParser
@@ -153,18 +154,10 @@ class OpenSSLControl:
         content = str(time.time())
         Achieve.write_file(achieve=openssl_success_lock, content=content)
 
+    @class_tag_decorator
     def run_openssl(self):
-        RecodeLog.info("=============开始执行openssl部分===============")
-        # a = AchieveControl()
-        check_file = os.path.join(CURRENT_PATH, 'tmp', 'openssl.success')
-        if os.path.exists(check_file):
-            RecodeLog.info("=============已存在完成状态文件，跳过执行openssl部分===============")
-            return True
         self.write_openssl_config()
         self.make_ssl_files()
-        Achieve.touch_achieve(achieve=check_file)
-        RecodeLog.info("=============执行完成openssl部分===============")
-        return True
 
 
 class ConfigParserControl:

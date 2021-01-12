@@ -11,6 +11,12 @@ from lib.Log import RecodeLog
 
 assert "centos" in platform.platform()
 
+if int(platform.python_version().strip(".")[0]) < 3:
+    import sys
+
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
+
 
 class BsCommand:
     def __init__(self):
@@ -198,7 +204,7 @@ class SSHFtp(object):
                 assert False
         elif self.pkey and not self.passwd:
             if not os.path.exists(self.pkey):
-                raise FileExistsError('Keyfile:{0} not exist'.format(self.pkey))
+                raise Exception('Keyfile:{0} not exist'.format(self.pkey))
             try:
                 self._key_connect(
                     username=self.user,
@@ -321,6 +327,9 @@ class SSHFtp(object):
                 if not os.path.isdir(x):
                     self.sftp.put(x, x.replace(local_dir, remote_dir))
                     RecodeLog.debug(msg="完成将{0},拷贝到主机{1},目录：{2}".format(x, self.host, x.replace(local_dir, remote_dir)))
+            RecodeLog.info(msg="完成将{0},拷贝到主机{1},目录：{2}".format(
+                local_dir, self.host, remote_dir
+            ))
         except Exception as error:
             RecodeLog.error('ssh get dir from master failed,{0}'.format(error))
 

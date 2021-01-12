@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-import copy
 import os
 import shutil
 from lib.BaseCommand import SSHFtp, LocalExec
 from lib.Log import RecodeLog
 from lib.FileCommand import Achieve
-from lib.setting.haproxy import HAPROXY_PACKAGE, HAPROXY_HOME
-from lib.settings import AUTHENTICATION, REMOTE_TMP_DIR, KUBERNETES_MASTER
-from lib.setting.base import TMP_PACKAGE_PATH, TAG_FILE_DIR
+from lib.setting.haproxy import *
+from lib.settings import AUTHENTICATION, KUBERNETES_MASTER
+from lib.setting.base import TMP_PACKAGE_PATH, SYSTEMCTL_DIR
+from lib.dependent import class_tag_decorator
 
 
 class HaProxyInstall:
@@ -17,26 +17,10 @@ class HaProxyInstall:
         self.__tmp_install_dir = os.path.join(
             TMP_PACKAGE_PATH, 'haproxy'
         )
-
-    @staticmethod
-    def install(sftp):
-        """
-        :return:
-        """
-        if not isinstance(sftp, SSHFtp):
-            raise TypeError("输入类型错误！")
-        exec_dir = os.path.join(
-            REMOTE_TMP_DIR, 'install_haproxy'
-        )
-        command = 'bash {0} {1} {2}'.format(
-            os.path.join(
-                exec_dir, 'install_haproxy.sh'
-            ),
-            os.path.join(exec_dir, 'resource'),
-            HAPROXY_PACKAGE
-        )
-        sftp.remote_cmd(command=command)
-        RecodeLog.info(msg="远程部署成功：{0}".format(command))
+        checked_dirs = [
+            ABS_HAPROXY_PACKAGE
+        ]
+        Achieve.check_dirs(dir_list=checked_dirs)
 
     def binary_build(self):
         """
@@ -74,7 +58,7 @@ class HaProxyInstall:
         local_haproxy_systemctl = os.path.join(local_resource_dir, 'haproxy.service')
 
         shutil.copy(local_haproxy_config, tmp_config_dir)
-        shutil.copy(local_haproxy_systemctl, tmp_config_dir)
+        shutil.copy(local_haproxy_systemctl, self.__tmp_install_dir)
         haproxy_config = '/etc/haproxy/haproxy.cfg'
         master_list = KUBERNETES_MASTER.values()
         for i in range(0, len(master_list)):
@@ -84,14 +68,12 @@ class HaProxyInstall:
                 mode='a'
             )
         for i in range(0, len(master_list)):
-            auth = copy.deepcopy(AUTHENTICATION)
-            auth['host'] = master_list[i]
             self.sftp.host = master_list[i]
             self.sftp.connect()
             self.sftp.sftp_put_dir(local_dir=self.__tmp_install_dir, remote_dir=HAPROXY_HOME)
             self.sftp.sftp_put(localfile=tmp_config_dir, remotefile=haproxy_config)
             self.sftp.remote_cmd(command="[[ ! -d /etc/haproxy ]] || mkdir -pv /etc/haproxy")
-            self.sftp.remote_cmd(command="ln -sf {0} /usr/sbin/".format(
+            self.sftp.remote_cmd(command="ln -sf {0} /usr/sbin/ && chmod 777 /usr/sbin/haproxy".format(
                 os.path.join(HAPROXY_HOME, 'sbin', '*')
             ))
             self.sftp.remote_cmd(
@@ -100,7 +82,12 @@ class HaProxyInstall:
                     haproxy_config
                 )
             )
-            self.install(sftp=self.sftp)
+            self.sftp.remote_cmd(
+                command='ln -sf {0} {1}'.format(
+                    os.path.join(HAPROXY_HOME, 'haproxy.service'),
+                    SYSTEMCTL_DIR
+                )
+            )
             self.sftp.close()
             RecodeLog.info(msg="Haproxy传输文件到{0}主机，成功!".format(master_list[i]))
 
@@ -117,19 +104,12 @@ class HaProxyInstall:
             self.sftp.close()
             RecodeLog.info(msg="主机:{0},haproxy启动成功，并设置开机启动".format(value))
 
+    @class_tag_decorator
     def run_haproxy(self):
         """
         :return:
         """
-        RecodeLog.info("=============开始执行haproxy部分===============")
-        # a = AchieveControl()
-        check_file = os.path.join(TAG_FILE_DIR, 'haproxy.success')
-        if os.path.exists(check_file):
-            RecodeLog.info("=============已存在完成状态文件，跳过执行haproxy部分===============")
-            return True
         self.binary_build()
         self.remote_install()
         self.start_haproxy()
-        Achieve.touch_achieve(achieve=check_file)
-        RecodeLog.info("=============执行完成haproxy部分===============")
         return True

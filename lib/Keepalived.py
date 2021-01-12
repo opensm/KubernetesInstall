@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-import copy
 import shutil
-from lib.BaseCommand import SSHFtp
+from lib.BaseCommand import SSHFtp, LocalExec
 from lib.FileCommand import Achieve
 from lib.Log import RecodeLog
 from lib.settings import *
-from lib.setting.base import TMP_PACKAGE_PATH, TAG_FILE_DIR
-from lib.setting.keepalived import KEEPALIVED_PACKAGE
+from lib.dependent import class_tag_decorator
+from lib.setting.base import TMP_PACKAGE_PATH, TAG_FILE_DIR, TMP_SYSTEMCTL_DIR, SYSTEMCTL_DIR
+from lib.setting.keepalived import *
 
 
 class KeepalivedInstall(object):
@@ -14,6 +14,13 @@ class KeepalivedInstall(object):
     def __init__(self):
         self.sftp = SSHFtp()
         self.sftp.setLoginVariable(data=AUTHENTICATION)
+        self.__tmp_install_dir = os.path.join(
+            TMP_PACKAGE_PATH, 'keepalived'
+        )
+        checked_dirs = [
+            ABS_KEEPALIVED_PACKAGE
+        ]
+        Achieve.check_dirs(dir_list=checked_dirs)
 
     @staticmethod
     def install(sftp):
@@ -33,7 +40,10 @@ class KeepalivedInstall(object):
             os.path.join(REMOTE_TMP_DIR, 'install_keepalived', 'resource'),
             KEEPALIVED_PACKAGE
         )
-        sftp.sftp_put(REMOTE_TMP_DIR, TMP_PACKAGE_PATH)
+        sftp.sftp_put_dir(
+            os.path.join(TMP_PACKAGE_PATH, 'install_keepalived'),
+            os.path.join(REMOTE_TMP_DIR, 'install_keepalived')
+        )
         sftp.remote_cmd(command=command)
         RecodeLog.info(msg="主机:{0},远程安装:{1},成功！".format(sftp.host, command))
 
@@ -67,12 +77,12 @@ class KeepalivedInstall(object):
                     '{{ interface }}',
                     ifname
                 ))
-            return False
+            assert False
         # 修改端口
         if not Achieve.alter_achieve(
                 achieve=src_file,
                 old_str='{{ PORT }}',
-                new_str=KUBERNETES_PORT
+                new_str=str(KUBERNETES_PORT)
         ):
             RecodeLog.error(
                 msg="修改文件：{0},替换文件内容失败：{1},{2}".format(
@@ -81,9 +91,22 @@ class KeepalivedInstall(object):
                     KUBERNETES_PORT
                 )
             )
-            return False
-        else:
-            return True
+            assert False
+
+            # 修改端口
+        if not Achieve.alter_achieve(
+                achieve=src_file,
+                old_str='{{ VIP }}',
+                new_str=KUBERNETES_VIP
+        ):
+            RecodeLog.error(
+                msg="修改文件：{0},替换文件内容失败：{1},{2}".format(
+                    src_file,
+                    '{{ VIP }}',
+                    KUBERNETES_VIP
+                )
+            )
+            assert False
 
     def start_keepalived(self):
         """
@@ -99,19 +122,33 @@ class KeepalivedInstall(object):
             self.sftp.remote_cmd(command="/bin/systemctl start keepalived")
             self.sftp.close()
 
+    def binary_build(self):
+        """
+        :return:
+        """
+        binary_build_shell = os.path.join(
+            TMP_PACKAGE_PATH,
+            'install_keepalived',
+            'binary_build.sh'
+        )
+        LocalExec.cmd(cmd_command="bash {0} {1} {2} {3}".format(
+            binary_build_shell,
+            TMP_PACKAGE_PATH,
+            KEEPALIVED_PACKAGE,
+            self.__tmp_install_dir
+        ))
+        shutil.copy(
+            os.path.join(TMP_SYSTEMCTL_DIR, 'keepalived.service'),
+            self.__tmp_install_dir
+        )
+
     def remote_install(self):
         """
         :return:
         """
         tmp_config_dir = os.path.join(
             TMP_PACKAGE_PATH,
-            'install_keepalived',
-            'conf'
-        )
-        tmp_resource_dir = os.path.join(
-            TMP_PACKAGE_PATH,
-            'install_keepalived',
-            'resource'
+            'install_keepalived'
         )
         master_keepalive_config = os.path.join(
             tmp_config_dir,
@@ -124,62 +161,63 @@ class KeepalivedInstall(object):
         keepalived_config = '/etc/keepalived/keepalived.conf'
         master_list = KUBERNETES_MASTER.values()
         for i in range(0, len(master_list)):
-            # 定义变量
-            auth = copy.deepcopy(AUTHENTICATION)
-            auth['host'] = master_list[i]
+            node_keepalived_conf = os.path.join(
+                tmp_config_dir,
+                '{0}_keepalived.conf'.format(master_list[i])
+            )
             # 判断节点性质
             if i < 1:
                 keepalived_dict = {
                     'host': master_list[i],
                     'ifname': IFNAME,
                     'src_file': master_keepalive_config,
-                    'rename': os.path.join(
-                        tmp_resource_dir,
-                        '{0}_keepalived.conf'.format(master_list[i])
-                    )
+                    'rename': node_keepalived_conf
                 }
             else:
                 keepalived_dict = {
                     'host': master_list[i],
                     'ifname': IFNAME,
                     'src_file': slave_keepalive_config,
-                    'rename': os.path.join(
-                        tmp_resource_dir,
-                        '{0}_keepalived.conf'.format(master_list[i])
-                    )
+                    'rename': node_keepalived_conf
                 }
             # 写入keepalived配置文件
-            if not self.write_keepalive_conf(**keepalived_dict):
-                RecodeLog.error(
-                    msg="修改配置文件失败,  {0}_keepalived.conf!".format(
-                        master_list[i]
-                    )
-                )
-                assert False
+            self.write_keepalive_conf(**keepalived_dict)
+            # 拷贝配置文件到安装目录
+            shutil.copy(src=node_keepalived_conf, dst=self.__tmp_install_dir)
             # 链接并拷贝配置到远程端
             self.sftp.host = master_list[i]
             self.sftp.connect()
-            self.sftp.sftp_put(
-                localfile=os.path.join(
-                    tmp_resource_dir,
-                    '{0}_keepalived.conf'.format(master_list[i])
-                ), remotefile=keepalived_config
+            self.sftp.sftp_put_dir(local_dir=self.__tmp_install_dir, remote_dir=KEEPALIVED_HOME)
+            self.sftp.remote_cmd(command="[[ ! -d /etc/keepalived ]] || mkdir -pv /etc/keepalived")
+            self.sftp.remote_cmd(command="ln -sf {0} /usr/sbin/ && chmod 777 /usr/sbin/keepalived".format(
+                os.path.join(KEEPALIVED_HOME, 'sbin', '*')
+            ))
+            self.sftp.remote_cmd(command="ln -sf {0} /usr/bin/".format(
+                os.path.join(KEEPALIVED_HOME, 'bin', '*')
+            ))
+
+            self.sftp.remote_cmd(
+                command='ln -sf {0} {1}'.format(
+                    os.path.join(
+                        KEEPALIVED_HOME,
+                        '{0}_keepalived.conf'.format(master_list[i])
+                    ),
+                    keepalived_config
+                )
             )
-            # 执行安装
-            self.install(sftp=self.sftp)
+            self.sftp.remote_cmd(
+                command='ln -sf {0} {1}'.format(
+                    os.path.join(KEEPALIVED_HOME, 'keepalived.service'),
+                    SYSTEMCTL_DIR
+                )
+            )
             self.sftp.close()
 
+    @class_tag_decorator
     def run_keepalive(self):
         """
         :return:
         """
-        RecodeLog.info("=============开始执行keepalived部分===============")
-        check_file = os.path.join(TAG_FILE_DIR, 'keepalived.success')
-        if os.path.exists(check_file):
-            RecodeLog.info("=============已存在完成状态文件，跳过执行keepalived部分===============")
-            return True
+        self.binary_build()
         self.remote_install()
         self.start_keepalived()
-        Achieve.touch_achieve(achieve=check_file)
-        RecodeLog.info("=============执行完成keepalived部分===============")
-        return True
