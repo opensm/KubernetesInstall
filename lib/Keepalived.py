@@ -188,7 +188,7 @@ class KeepalivedInstall(object):
             self.sftp.host = master_list[i]
             self.sftp.connect()
             self.sftp.sftp_put_dir(local_dir=self.__tmp_install_dir, remote_dir=KEEPALIVED_HOME)
-            self.sftp.remote_cmd(command="[[ ! -d /etc/keepalived ]] || mkdir -pv /etc/keepalived")
+            self.sftp.remote_cmd(command="[[ ! -d /etc/keepalived ]] && mkdir -pv /etc/keepalived")
             self.sftp.remote_cmd(command="ln -sf {0} /usr/sbin/ && chmod 777 /usr/sbin/keepalived".format(
                 os.path.join(KEEPALIVED_HOME, 'sbin', '*')
             ))
