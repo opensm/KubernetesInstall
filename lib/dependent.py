@@ -124,10 +124,6 @@ def get_cluster_list():
 
 @tag_decorator
 def dependent():
-    # check_file = os.path.join(CURRENT_PATH, 'tmp', 'dependent.success')
-    # if os.path.exists(check_file):
-    #     RecodeLog.info("=============已存在完成状态文件，跳过执行dependent部分===============")
-    #     return True
     cluster_list = get_cluster_list()
     for host in cluster_list:
         sftp.host = host
@@ -141,9 +137,7 @@ def dependent():
             remote_dir=REMOTE_TMP_DIR
         )
         sftp.close()
-    # Achieve.touch_achieve(achieve=check_file)
     rsync_host()
-    return True
 
 
 @tag_decorator
@@ -181,16 +175,10 @@ def kernel_update():
             LocalExec.cmd(cmd_command="reboot")
     else:
         RecodeLog.info(msg="请操作完成之后自行重启集群主机")
-        assert False
 
 
 @tag_decorator
 def docker_install():
-    # RecodeLog.info("=============开始执行docker_install部分===============")
-    # check_file = os.path.join(TAG_FILE_DIR, 'docker_install.success')
-    # if os.path.exists(check_file):
-    #     RecodeLog.info("=============已存在完成状态文件，跳过执行docker_install部分===============")
-    #     return True
     cluster_list = get_cluster_list()
     command = "bash {0}".format(
         os.path.join(
@@ -202,8 +190,6 @@ def docker_install():
         sftp.remote_cmd(command=command)
         sftp.close()
         RecodeLog.info(msg="主机:{0},执行成功:{1}".format(host, command))
-
-    # Achieve.touch_achieve(achieve=check_file)
 
 
 def test_ping():
