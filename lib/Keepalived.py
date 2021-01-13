@@ -61,32 +61,33 @@ class KeepalivedInstall(object):
             RecodeLog.error(msg="文件不存在：{0}".format(src_file))
             assert False
         if rename:
-            shutil.copy(src_file, rename)
+            dsc = rename
         else:
-            shutil.copy(src_file, "{1}_{0}".format(src_file, host))
+            dsc = "{1}_{0}".format(src_file, host)
+        shutil.copy(src_file, dsc)
         # 修改网卡
         if not Achieve.alter_achieve(
-                achieve=src_file,
+                achieve=dsc,
                 old_str='{{ interface }}',
                 new_str=ifname,
                 matching='interface'
         ):
             RecodeLog.error(
                 msg="修改文件：{0},内容失败,修改内容：{1},为:{2}".format(
-                    src_file,
+                    dsc,
                     '{{ interface }}',
                     ifname
                 ))
             assert False
         # 修改端口
         if not Achieve.alter_achieve(
-                achieve=src_file,
+                achieve=dsc,
                 old_str='{{ PORT }}',
                 new_str=str(KUBERNETES_PORT)
         ):
             RecodeLog.error(
                 msg="修改文件：{0},替换文件内容失败：{1},{2}".format(
-                    src_file,
+                    dsc,
                     '{{ PORT }}',
                     KUBERNETES_PORT
                 )
@@ -95,13 +96,13 @@ class KeepalivedInstall(object):
 
             # 修改端口
         if not Achieve.alter_achieve(
-                achieve=src_file,
+                achieve=dsc,
                 old_str='{{ VIP }}',
                 new_str=KUBERNETES_VIP
         ):
             RecodeLog.error(
                 msg="修改文件：{0},替换文件内容失败：{1},{2}".format(
-                    src_file,
+                    dsc,
                     '{{ VIP }}',
                     KUBERNETES_VIP
                 )

@@ -112,3 +112,4 @@ class HaProxyInstall:
         self.binary_build()
         self.remote_install()
         self.start_haproxy()
+        return True

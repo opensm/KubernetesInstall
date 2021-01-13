@@ -21,7 +21,6 @@ class KubernetesInstall:
         created_dirs = [
             TMP_ROOT_DIR,
             TMP_SYSTEMCTL_DIR,
-            TMP_KUBERNETES_MASTER_SSL_DIR,
             TMP_KUBERNETES_MASTER_BIN_DIR,
             os.path.join(TMP_KUBERNETES_MASTER_CONFIG_DIR, 'manifests'),
             os.path.join(TMP_KUBERNETES_NODE_CONFIG_DIR, 'manifests'),
@@ -32,6 +31,17 @@ class KubernetesInstall:
             KUBERNETES_MASTER_PACKAGE,
             KUBERNETES_NODE_PACKAGE
         ]
+        # 判断当前安装目录是否存在主目录，存在就将其移走
+        if os.path.exists(TMP_KUBERNETES_MASTER_DIR):
+            shutil.move(
+                src=TMP_KUBERNETES_MASTER_DIR,
+                dst="{0}.{1}".format(TMP_KUBERNETES_MASTER_DIR, int(time.time()))
+            )
+        if os.path.exists(TMP_KUBERNETES_NODE_DIR):
+            shutil.move(
+                src=TMP_KUBERNETES_NODE_DIR,
+                dst="{0}.{1}".format(TMP_KUBERNETES_NODE_DIR, int(time.time()))
+            )
         Achieve.check_dirs(dir_list=created_dirs, create=True)
         Achieve.check_dirs(dir_list=checked_dirs, create=False)
         self.kubectl_bin = os.path.join(TMP_KUBERNETES_MASTER_BIN_DIR, 'kubectl')
@@ -43,12 +53,7 @@ class KubernetesInstall:
         """
         :return:
         """
-        # 判断当前安装目录是否存在主目录，存在就将其移走
-        if os.path.exists(TMP_KUBERNETES_MASTER_DIR):
-            shutil.move(
-                src=TMP_KUBERNETES_MASTER_DIR,
-                dst="{0}.{1}".format(TMP_KUBERNETES_MASTER_DIR, int(time.time()))
-            )
+
         # 解压文件
         if not Achieve.tar_decompression(
                 achieve=KUBERNETES_MASTER_PACKAGE,
@@ -516,7 +521,7 @@ class KubernetesInstall:
             self.sftp.host = value
             self.sftp.connect()
             for service in master_service:
-                self.sftp.remote_cmd(command='/bin/systemctl start  {0}'.format(service))
+                self.sftp.remote_cmd(command='/bin/systemctl start --now {0}'.format(service))
             self.sftp.close()
 
     def alias_kubelet(self):

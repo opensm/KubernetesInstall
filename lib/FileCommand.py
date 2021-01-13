@@ -26,7 +26,7 @@ class AchieveControl(object):
                 os.makedirs(x)
                 RecodeLog.info(msg='创建目录成功: {0}'.format(x))
             else:
-                raise FileNotFoundError("目录不存在,{0}!".format(x))
+                raise Exception("目录不存在,{0}!".format(x))
 
     @staticmethod
     def check_achieve(achieve):
@@ -248,10 +248,11 @@ class AchieveControl(object):
                 if matching:
                     if not re.search(matching, data[i]):
                         continue
-                    RecodeLog.info(msg="匹配到:{0},开始替换：{1}=>{2}".format(
+                    RecodeLog.info(msg="匹配到:{0},开始替换：{1}=>{2},文件:{3}".format(
                         matching,
                         new_str,
-                        data[i]
+                        data[i],
+                        achieve
                     ))
                     data[i] = re.sub(old_str, new_str, data[i])
                 else:

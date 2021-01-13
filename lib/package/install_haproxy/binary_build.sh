@@ -13,10 +13,10 @@ function install() {
     echo "文件:${download_path}/${package}.tar.gz,不存在，退出！"
     exit 1
   fi
-  if [ ! -f "${tmp_install}"/'haproxy.service' ]; then
-    echo "启动脚本不存在：$tmp_install/haproxy.service"
-    exit 1
-  fi
+#  if [ ! -f "${tmp_install}"/'haproxy.service' ]; then
+#    echo "启动脚本不存在：$tmp_install/haproxy.service"
+#    exit 1
+#  fi
   # shellcheck disable=SC2164
   tar -zxvf "${package}".tar.gz && cd "${package}" && make clean && make PREFIX="$tmp_install" TARGET=linux2628 && make install PREFIX="$tmp_install"
   # shellcheck disable=SC2181
