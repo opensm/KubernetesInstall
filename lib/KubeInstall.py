@@ -31,6 +31,16 @@ class KubernetesInstall:
             KUBERNETES_MASTER_PACKAGE,
             KUBERNETES_NODE_PACKAGE
         ]
+        if os.path.exists(TMP_KUBERNETES_MASTER_DIR):
+            shutil.move(
+                src=TMP_KUBERNETES_MASTER_DIR,
+                dst="{0}.{1}".format(TMP_KUBERNETES_MASTER_DIR, int(time.time()))
+            )
+        if os.path.exists(TMP_KUBERNETES_NODE_DIR):
+            shutil.move(
+                src=TMP_KUBERNETES_NODE_DIR,
+                dst="{0}.{1}".format(TMP_KUBERNETES_NODE_DIR, int(time.time()))
+            )
         Achieve.check_dirs(dir_list=created_dirs, create=True)
         Achieve.check_dirs(dir_list=checked_dirs, create=False)
         self.kubectl_bin = os.path.join(TMP_KUBERNETES_MASTER_BIN_DIR, 'kubectl')
