@@ -127,16 +127,16 @@ def get_cluster_list():
 @tag_decorator
 def dependent():
     # 判断当前安装目录是否存在主目录，存在就将其移走
-    if os.path.exists(TMP_KUBERNETES_MASTER_DIR):
-        shutil.move(
-            src=TMP_KUBERNETES_MASTER_DIR,
-            dst="{0}.{1}".format(TMP_KUBERNETES_MASTER_DIR, int(time.time()))
-        )
-    if os.path.exists(TMP_KUBERNETES_NODE_DIR):
-        shutil.move(
-            src=TMP_KUBERNETES_NODE_DIR,
-            dst="{0}.{1}".format(TMP_KUBERNETES_NODE_DIR, int(time.time()))
-        )
+    # if os.path.exists(TMP_KUBERNETES_MASTER_DIR):
+    #     shutil.move(
+    #         src=TMP_KUBERNETES_MASTER_DIR,
+    #         dst="{0}.{1}".format(TMP_KUBERNETES_MASTER_DIR, int(time.time()))
+    #     )
+    # if os.path.exists(TMP_KUBERNETES_NODE_DIR):
+    #     shutil.move(
+    #         src=TMP_KUBERNETES_NODE_DIR,
+    #         dst="{0}.{1}".format(TMP_KUBERNETES_NODE_DIR, int(time.time()))
+    #     )
     # check_file = os.path.join(CURRENT_PATH, 'tmp', 'dependent.success')
     # if os.path.exists(check_file):
     #     RecodeLog.info("=============已存在完成状态文件，跳过执行dependent部分===============")
