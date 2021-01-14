@@ -1,4 +1,6 @@
+<html>
 <img src="https://github.com/opensm/KubernetesInstall/blob/main/lib/tmp/favicon.png" width="200" height="200" align="middle" />
+</html>
 # Kubernetes 一键安装工具
 ## 说明:
 脚本中不包含
