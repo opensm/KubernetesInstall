@@ -4,6 +4,8 @@
 
 #报错退出
 set -e
+# shellcheck disable=SC2034
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 SELINUX_STATUS=$(getenforce)
 #关闭防火墙
@@ -65,6 +67,18 @@ yum -y install conntrack-tools libnl-devel.x86_64
 if [ $? -ne 0 ]; then
   echo "conntrack-tools 安装失败"
 fi
-
+cd "$DIR"
+python get-pip.py
+while true; do
+  python get-pip.py
+  # shellcheck disable=SC1009
+  # shellcheck disable=SC2181
+  if [ $? -eq 0 ]; then
+    pip install requests
+    if [ $? -eq 0 ]; then
+      break
+    fi
+  fi
+done
 echo "-----please reboot-----"
 exit 0
