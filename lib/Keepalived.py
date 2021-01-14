@@ -159,6 +159,10 @@ class KeepalivedInstall(object):
             tmp_config_dir,
             'slave_keepalived.conf'
         )
+        keepalive_script = os.path.join(
+            tmp_config_dir,
+            'slave_keepalived.conf'
+        )
         keepalived_config = '/etc/keepalived/keepalived.conf'
         master_list = KUBERNETES_MASTER.values()
         for i in range(0, len(master_list)):

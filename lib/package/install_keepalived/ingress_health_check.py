@@ -50,7 +50,7 @@ def health(url, method):
 
     try:
         res = requests.request(method=method, url=url, timeout=3)
-        if res.status_code != 200:
+        if res.status_code != 200 and not str(res.status_code).startswith('4'):
             raise HTTPError(res.content)
         RecodeLog.info(msg="健康检查成功,url:{0},返回内容:{1}".format(url, res.content))
         sys.exit(0)
