@@ -20,27 +20,12 @@ class KubernetesInstall:
     def __init__(self):
         created_dirs = [
             TMP_ROOT_DIR,
-            TMP_SYSTEMCTL_DIR,
-            TMP_KUBERNETES_MASTER_BIN_DIR,
-            os.path.join(TMP_KUBERNETES_MASTER_CONFIG_DIR, 'manifests'),
-            os.path.join(TMP_KUBERNETES_NODE_CONFIG_DIR, 'manifests'),
-            TMP_KUBERNETES_NODE_SSL_DIR,
-            TMP_KUBERNETES_NODE_BIN_DIR
+            TMP_SYSTEMCTL_DIR
         ]
         checked_dirs = [
             KUBERNETES_MASTER_PACKAGE,
             KUBERNETES_NODE_PACKAGE
         ]
-        if os.path.exists(TMP_KUBERNETES_MASTER_DIR):
-            shutil.move(
-                src=TMP_KUBERNETES_MASTER_DIR,
-                dst="{0}.{1}".format(TMP_KUBERNETES_MASTER_DIR, int(time.time()))
-            )
-        if os.path.exists(TMP_KUBERNETES_NODE_DIR):
-            shutil.move(
-                src=TMP_KUBERNETES_NODE_DIR,
-                dst="{0}.{1}".format(TMP_KUBERNETES_NODE_DIR, int(time.time()))
-            )
         Achieve.check_dirs(dir_list=created_dirs, create=True)
         Achieve.check_dirs(dir_list=checked_dirs, create=False)
         self.kubectl_bin = os.path.join(TMP_KUBERNETES_MASTER_BIN_DIR, 'kubectl')
@@ -52,7 +37,18 @@ class KubernetesInstall:
         """
         :return:
         """
-
+        if os.path.exists(TMP_KUBERNETES_MASTER_DIR):
+            shutil.move(
+                src=TMP_KUBERNETES_MASTER_DIR,
+                dst="{0}.{1}".format(TMP_KUBERNETES_MASTER_DIR, int(time.time()))
+            )
+        created_dirs = [
+            TMP_ROOT_DIR,
+            TMP_SYSTEMCTL_DIR,
+            TMP_KUBERNETES_MASTER_BIN_DIR,
+            os.path.join(TMP_KUBERNETES_MASTER_CONFIG_DIR, 'manifests')
+        ]
+        Achieve.check_dirs(dir_list=created_dirs, create=True)
         # 解压文件
         if not Achieve.tar_decompression(
                 achieve=KUBERNETES_MASTER_PACKAGE,
@@ -113,6 +109,22 @@ class KubernetesInstall:
         """
         :return:
         """
+        if os.path.exists(TMP_KUBERNETES_NODE_DIR):
+            shutil.move(
+                src=TMP_KUBERNETES_NODE_DIR,
+                dst="{0}.{1}".format(TMP_KUBERNETES_NODE_DIR, int(time.time()))
+            )
+        created_dirs = [
+            os.path.join(TMP_KUBERNETES_NODE_CONFIG_DIR, 'manifests'),
+            TMP_KUBERNETES_NODE_SSL_DIR,
+            TMP_KUBERNETES_NODE_BIN_DIR
+        ]
+        Achieve.check_dirs(dir_list=created_dirs, create=True)
+        if os.path.exists(TMP_KUBERNETES_NODE_DIR):
+            shutil.move(
+                src=TMP_KUBERNETES_NODE_DIR,
+                dst="{0}.{1}".format(TMP_KUBERNETES_NODE_DIR, int(time.time()))
+            )
         # 解压文件
         if not Achieve.tar_decompression(
                 achieve=KUBERNETES_NODE_PACKAGE,
