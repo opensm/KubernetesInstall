@@ -1,4 +1,4 @@
-![blockchain](https://kubernetes.io/images/favicon.png)
+![blockchain](https://github.com/opensm/KubernetesInstall/blob/main/lib/tmp/favicon.png)
 # Kubernetes 一键安装工具
 ## 说明:
 脚本中不包含
