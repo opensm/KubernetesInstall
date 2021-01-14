@@ -62,25 +62,34 @@ EOF
 
 sysctl -p
 
-yum -y install conntrack-tools libnl-devel.x86_64
+yum -y install conntrack-tools libnl-devel.x86_64 epel-release
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   echo "conntrack-tools 安装失败"
 fi
-cd "$DIR"
-python get-pip.py
-while true; do
-  python get-pip.py
-  # shellcheck disable=SC1009
-  # shellcheck disable=SC2181
-  if [ $? -ne 0 ]; then
-    continue
-  fi
-  pip install requests
-  # shellcheck disable=SC2181
-  if [ $? -eq 0 ]; then
-    break
-  fi
-done
+yum install python-pip -y
+# shellcheck disable=SC2181
+if [ $? -ne 0 ]; then
+  echo "python-pip 安装失败"
+fi
+pip install requests
+# shellcheck disable=SC2181
+if [ $? -ne 0 ]; then
+  echo "requests 安装失败"
+fi
+#cd "$DIR"
+#while true; do
+#  python get-pip.py
+#  # shellcheck disable=SC1009
+#  # shellcheck disable=SC2181
+#  if [ $? -ne 0 ]; then
+#    continue
+#  fi
+#  pip install requests
+#  # shellcheck disable=SC2181
+#  if [ $? -eq 0 ]; then
+#    break
+#  fi
+#done
 echo "-----please reboot-----"
 exit 0
