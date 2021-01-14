@@ -3,13 +3,15 @@
 `脚本中不包含
 1.kubernetes-node-linux-amd64.tar.gz
 2.kubernetes-server-linux-amd64.tar.gz
-请将以上文件下载并放置到lib/package目录中
+请将以上文件下载并放置到
 `
+[lib/package](https://github.com/opensm/KubernetesInstall/tree/main/lib/package)
+
 ## 版本：
 `kubernetes:v1.8    
 Etcd:3.4.9         
 Cni:0.8.6         
-calico/cni:v3.9.6   
+flannel/cni:v3.9.6   
 coredns:1.4.0   `
 ## _安装步骤_
 ### 1. 配置文件修改 
