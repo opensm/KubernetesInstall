@@ -73,11 +73,13 @@ while true; do
   python get-pip.py
   # shellcheck disable=SC1009
   # shellcheck disable=SC2181
+  if [ $? -ne 0 ]; then
+    continue
+  fi
+  pip install requests
+  # shellcheck disable=SC2181
   if [ $? -eq 0 ]; then
-    pip install requests
-    if [ $? -eq 0 ]; then
-      break
-    fi
+    break
   fi
 done
 echo "-----please reboot-----"
