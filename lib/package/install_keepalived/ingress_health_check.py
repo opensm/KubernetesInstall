@@ -49,7 +49,7 @@ def health(url, method):
         raise Exception("请求格式错误")
 
     try:
-        res = requests.request(method=method, url=url, timeout=3)
+        res = requests.request(method=method, url=url, timeout=3, verify=False)
         if res.status_code != 200 and not str(res.status_code).startswith('4'):
             raise HTTPError(res.content)
         RecodeLog.info(msg="健康检查成功,url:{0},返回内容:{1}".format(url, res.content))
