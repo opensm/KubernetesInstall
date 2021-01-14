@@ -79,22 +79,8 @@ class KeepalivedInstall(object):
                     ifname
                 ))
             assert False
-        # 修改端口
-        if not Achieve.alter_achieve(
-                achieve=dsc,
-                old_str='{{ ADDRESS }}',
-                new_str="https://{0}:{1}".format(host, KUBERNETES_PORT)
-        ):
-            RecodeLog.error(
-                msg="修改文件：{0},替换文件内容失败：{1},{2}".format(
-                    dsc,
-                    '{{ ADDRESS }}',
-                    "https://{0}:{1}".format(host, KUBERNETES_PORT)
-                )
-            )
-            assert False
 
-            # 修改端口
+        # 修改端口
         if not Achieve.alter_achieve(
                 achieve=dsc,
                 old_str='{{ VIP }}',
@@ -161,10 +147,10 @@ class KeepalivedInstall(object):
         )
         tmp_keepalive_script = os.path.join(
             tmp_config_dir,
-            'ingress_health_check.py'
+            'check_haproxy.sh'
         )
         keepalived_config = '/etc/keepalived/keepalived.conf'
-        keepalive_script = '/etc/keepalived/ingress_health_check.py'
+        keepalive_script = '/etc/keepalived/check_haproxy.sh'
         master_list = KUBERNETES_MASTER.values()
         for i in range(0, len(master_list)):
             node_keepalived_conf = os.path.join(
@@ -191,6 +177,16 @@ class KeepalivedInstall(object):
             # 拷贝配置文件到安装目录
             shutil.copy(src=node_keepalived_conf, dst=self.__tmp_install_dir)
             shutil.copy(src=tmp_keepalive_script, dst=self.__tmp_install_dir)
+            Achieve.alter_achieve(
+                achieve=os.path.join(self.__tmp_install_dir, 'check_haproxy.sh'),
+                old_str='{{ VIP }}',
+                new_str=KUBERNETES_VIP
+            )
+            Achieve.alter_achieve(
+                achieve=os.path.join(self.__tmp_install_dir, 'check_haproxy.sh'),
+                old_str='{{ PORT }}',
+                new_str=str(KUBERNETES_PORT)
+            )
             # 链接并拷贝配置到远程端
             self.sftp.host = master_list[i]
             self.sftp.connect()
@@ -220,7 +216,7 @@ class KeepalivedInstall(object):
             )
             self.sftp.remote_cmd(
                 command='ln -sf {0} {1}'.format(
-                    os.path.join(KEEPALIVED_HOME, 'ingress_health_check.py'),
+                    os.path.join(KEEPALIVED_HOME, 'check_haproxy.sh'),
                     keepalive_script
                 )
             )

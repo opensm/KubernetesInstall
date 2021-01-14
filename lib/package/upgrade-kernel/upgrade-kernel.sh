@@ -5,7 +5,7 @@
 #报错退出
 set -e
 # shellcheck disable=SC2034
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+#DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 SELINUX_STATUS=$(getenforce)
 #关闭防火墙
