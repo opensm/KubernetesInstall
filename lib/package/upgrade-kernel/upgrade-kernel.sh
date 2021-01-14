@@ -67,16 +67,16 @@ yum -y install conntrack-tools libnl-devel.x86_64 epel-release
 if [ $? -ne 0 ]; then
   echo "conntrack-tools 安装失败"
 fi
-yum install python-pip -y
-# shellcheck disable=SC2181
-if [ $? -ne 0 ]; then
-  echo "python-pip 安装失败"
-fi
-pip install requests
-# shellcheck disable=SC2181
-if [ $? -ne 0 ]; then
-  echo "requests 安装失败"
-fi
+#yum install python-pip -y
+## shellcheck disable=SC2181
+#if [ $? -ne 0 ]; then
+#  echo "python-pip 安装失败"
+#fi
+#pip install requests
+## shellcheck disable=SC2181
+#if [ $? -ne 0 ]; then
+#  echo "requests 安装失败"
+#fi
 #cd "$DIR"
 #while true; do
 #  python get-pip.py
