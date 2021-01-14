@@ -1,5 +1,4 @@
-![blockchain](<img src="https://github.com/opensm/KubernetesInstall/blob/main/lib/tmp/favicon.png" width="50%">
-)
+![blockchain](https://github.com/opensm/KubernetesInstall/blob/main/lib/tmp/favicon.png =300x300)
 # Kubernetes 一键安装工具
 ## 说明:
 脚本中不包含
