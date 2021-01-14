@@ -58,4 +58,5 @@ KUBERNETES_NODE = {
 ### python版本：python2.7
 ### CPU: 2核以上
 ### 内存: 不低于4G
+### 运行前请检查各个节点的时间是否同步，可能造成证书异常的问题，博主亲测数次证书生成主机时间快于使用证书节点时间会造成：tls: failed to verify client's certificate: x509: certificate has expired or is not yet valid
 ###脚本将持续更新 有问题请联系我 QQ:1096010121
