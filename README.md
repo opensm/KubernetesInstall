@@ -1,10 +1,9 @@
 # Kubernetes 一键安装工具
 ## 说明:
-`脚本中不包含  
+脚本中不包含  
 1. kubernetes-node-linux-amd64.tar.gz  
 2. kubernetes-server-linux-amd64.tar.gz  
 请将以上文件下载并放置到
-`
 [lib/package](https://github.com/opensm/KubernetesInstall/tree/main/lib/package)
 
 ## 版本：
