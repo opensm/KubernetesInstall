@@ -120,11 +120,6 @@ class KubernetesInstall:
             TMP_KUBERNETES_NODE_BIN_DIR
         ]
         Achieve.check_dirs(dir_list=created_dirs, create=True)
-        if os.path.exists(TMP_KUBERNETES_NODE_DIR):
-            shutil.move(
-                src=TMP_KUBERNETES_NODE_DIR,
-                dst="{0}.{1}".format(TMP_KUBERNETES_NODE_DIR, int(time.time()))
-            )
         # 解压文件
         if not Achieve.tar_decompression(
                 achieve=KUBERNETES_NODE_PACKAGE,
