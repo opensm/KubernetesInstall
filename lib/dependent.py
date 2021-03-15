@@ -173,9 +173,12 @@ def kernel_update():
                 continue
             sftp.host = host
             sftp.connect()
-            sftp.remote_cmd(command='reboot')
-            RecodeLog.info(msg="主机:{0},执行成功:reboot".format(host))
-            sftp.close()
+            try:
+                sftp.remote_cmd(command='reboot')
+                RecodeLog.info(msg="主机:{0},执行成功:reboot".format(host))
+                sftp.close()
+            except Exception as error:
+                RecodeLog.info("主机已关闭:{0},{1}".format(host, error))
         # 重启本机
         for host in cluster_list:
             if not LocalExec.check_ip_same(host, IFNAME):
