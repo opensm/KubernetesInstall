@@ -161,6 +161,7 @@ def kernel_update():
         sftp.close()
         RecodeLog.info(msg="主机:{0},执行成功:{1}".format(host, command))
     reboot = ""
+    Achieve.touch_achieve(os.path.join(TAG_FILE_DIR, "kernel_update.success"))
     while reboot.upper() not in ['YES', 'NO', 'Y', 'N']:
         reboot = raw_input("注意！！！！！\nkernel升级完成,是否现在重启集群全部主机？yes/YES or NO/no:")
         if not isinstance(reboot, str):
@@ -180,7 +181,6 @@ def kernel_update():
             except Exception as error:
                 RecodeLog.info("主机已关闭:{0},{1}".format(host, error))
         # 重启本机
-        Achieve.touch_achieve(os.path.join(TAG_FILE_DIR, "kernel_update.success"))
         for host in cluster_list:
             if not LocalExec.check_ip_same(host, IFNAME):
                 continue
