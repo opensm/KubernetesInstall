@@ -150,11 +150,6 @@ def dependent():
 
 @tag_decorator
 def kernel_update():
-    # RecodeLog.info("=============开始执行kernel_update部分===============")
-    # check_file = os.path.join(TAG_FILE_DIR, 'kernel_update.success')
-    # if os.path.exists(check_file):
-    #     RecodeLog.info("=============已存在完成状态文件，跳过执行kernel_update部分===============")
-    #     return True
     command = "bash {0}".format(os.path.join(
         REMOTE_TMP_DIR, 'upgrade-kernel.sh'
     ))
@@ -165,7 +160,6 @@ def kernel_update():
         sftp.remote_cmd(command=command)
         sftp.close()
         RecodeLog.info(msg="主机:{0},执行成功:{1}".format(host, command))
-    # Achieve.touch_achieve(achieve=check_file)
     reboot = ""
     while reboot.upper() not in ['YES', 'NO', 'Y', 'N']:
         reboot = raw_input("注意！！！！！\nkernel升级完成,是否现在重启集群全部主机？yes/YES or NO/no:")
@@ -190,7 +184,6 @@ def kernel_update():
     else:
         RecodeLog.info(msg="请操作完成之后自行重启集群主机")
         assert False
-    # Achieve.touch_achieve(achieve=check_file)
     return True
 
 
