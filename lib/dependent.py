@@ -166,30 +166,30 @@ def kernel_update():
         sftp.close()
         RecodeLog.info(msg="主机:{0},执行成功:{1}".format(host, command))
     # Achieve.touch_achieve(achieve=check_file)
-    # reboot = ""
-    # while reboot.upper() not in ['YES', 'NO', 'Y', 'N']:
-    #     reboot = raw_input("注意！！！！！\nkernel升级完成,是否现在重启集群全部主机？yes/YES or NO/no:")
-    #     if not isinstance(reboot, str):
-    #         print("输入类型错误")
-    #         assert False
-    # if reboot.upper() == "YES" or reboot.upper() == "Y":
-    #     # 其他主机重启
-    #     for host in cluster_list:
-    #         if LocalExec.check_ip_same(host, IFNAME):
-    #             continue
-    #         sftp.host = host
-    #         sftp.connect()
-    #         sftp.remote_cmd(command='reboot')
-    #         RecodeLog.info(msg="主机:{0},执行成功:reboot".format(host))
-    #         sftp.close()
-    #     # 重启本机
-    #     for host in cluster_list:
-    #         if not LocalExec.check_ip_same(host, IFNAME):
-    #             continue
-    #         LocalExec.cmd(cmd_command="reboot")
-    # else:
-    #     RecodeLog.info(msg="请操作完成之后自行重启集群主机")
-    #     assert False
+    reboot = ""
+    while reboot.upper() not in ['YES', 'NO', 'Y', 'N']:
+        reboot = raw_input("注意！！！！！\nkernel升级完成,是否现在重启集群全部主机？yes/YES or NO/no:")
+        if not isinstance(reboot, str):
+            print("输入类型错误")
+            assert False
+    if reboot.upper() == "YES" or reboot.upper() == "Y":
+        # 其他主机重启
+        for host in cluster_list:
+            if LocalExec.check_ip_same(host, IFNAME):
+                continue
+            sftp.host = host
+            sftp.connect()
+            sftp.remote_cmd(command='reboot')
+            RecodeLog.info(msg="主机:{0},执行成功:reboot".format(host))
+            sftp.close()
+        # 重启本机
+        for host in cluster_list:
+            if not LocalExec.check_ip_same(host, IFNAME):
+                continue
+            LocalExec.cmd(cmd_command="reboot")
+    else:
+        RecodeLog.info(msg="请操作完成之后自行重启集群主机")
+        assert False
     # Achieve.touch_achieve(achieve=check_file)
     return True
 
