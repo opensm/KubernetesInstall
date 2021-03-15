@@ -180,6 +180,7 @@ def kernel_update():
             except Exception as error:
                 RecodeLog.info("主机已关闭:{0},{1}".format(host, error))
         # 重启本机
+        Achieve.touch_achieve("kernel_update.success")
         for host in cluster_list:
             if not LocalExec.check_ip_same(host, IFNAME):
                 continue
