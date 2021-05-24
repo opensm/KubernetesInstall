@@ -54,7 +54,8 @@ KUBERNETES_NODE = {
 ### 4. 确认重启之后进入脚本目录继续执行
 #### python run.py
 ##  _支持环境_
-### 系统：Centos 7 
+### 系统：Centos 7.5 以上 
+### 系统语言：英语
 ### python版本：python2.7
 ### CPU: 2核以上
 ### 内存: 不低于4G
